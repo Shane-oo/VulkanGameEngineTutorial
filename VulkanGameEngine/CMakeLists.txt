@@ -1,13 +1,18 @@
 ﻿# CMakeList.txt : CMake project for VulkanGameEngine, include source and define
 # project specific logic here.
 #
+# Copy the shaders folder to the build and binary directory
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 
 # Add source to this project's executable.
 add_executable (VulkanGameEngine "VulkanGameEngine.cpp" "VulkanGameEngine.h"
         Window.cpp
         Window.h
         FirstApp.cpp
-        FirstApp.h)
+        FirstApp.h
+        PipeLine.cpp
+        PipeLine.h)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VulkanGameEngine PROPERTY CXX_STANDARD 20)
@@ -28,3 +33,4 @@ target_link_libraries(VulkanGameEngine PRIVATE glfw)
 find_package(glm REQUIRED)
 # Link GLM Library
 target_link_directories(VulkanGameEngine PRIVATE glm)
+

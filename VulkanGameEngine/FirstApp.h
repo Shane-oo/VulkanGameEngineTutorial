@@ -7,10 +7,12 @@
 
 
 #include "Window.h"
+#include "PipeLine.h"
 
 class FirstApp {
 private:
     Window window = Window(WIDTH, HEIGHT, "Hello Vulkan!");
+    PipeLine pipeLine = PipeLine("shaders/simple_shader_vert.glsl.spv", "shaders/simple_shader_frag.glsl.spv");
 
 public:
     static constexpr int WIDTH = 800;

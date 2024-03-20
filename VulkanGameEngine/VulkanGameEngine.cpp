@@ -7,13 +7,12 @@
 using namespace std;
 
 int main() {
-    FirstApp app = FirstApp();
-
     try {
+        FirstApp app = FirstApp();
         app.Run();
     }
     catch (const std::exception &e) {
-        std::cerr << e.what() << '\n';
+        printf("%s\n", e.what());
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

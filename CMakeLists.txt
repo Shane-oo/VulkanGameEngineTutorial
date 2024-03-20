@@ -11,6 +11,23 @@ endif()
 
 project ("VulkanGameEngineTutorial")
 
-
-# Include sub-projects.                 
+# Include sub-projects.
 add_subdirectory ("VulkanGameEngine")
+
+# run commands
+if(WIN32)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR} cmd.exe /c "compile.bat"
+          RESULT_VARIABLE result
+          OUTPUT_VARIABLE output
+          ERROR_VARIABLE error_output
+  )
+  if(result EQUAL 0)
+    message(STATUS "Shaders Compiled executed successfully")
+  else()
+    message(FATAL_ERROR "Error executing Shader Compiler: ${error_output}")
+  endif()
+endif()
+  
+
+
+
