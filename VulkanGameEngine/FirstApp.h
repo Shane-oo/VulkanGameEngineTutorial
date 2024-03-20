@@ -12,7 +12,10 @@
 class FirstApp {
 private:
     Window window = Window(WIDTH, HEIGHT, "Hello Vulkan!");
-    PipeLine pipeLine = PipeLine("shaders/simple_shader_vert.glsl.spv", "shaders/simple_shader_frag.glsl.spv");
+    EngineDevice engineDevice = EngineDevice(window);
+    PipeLine pipeLine = PipeLine(engineDevice, "shaders/simple_shader_vert.glsl.spv",
+                                 "shaders/simple_shader_frag.glsl.spv",
+                                 PipeLine::defaultPipelineConfigInfo(WIDTH, HEIGHT));
 
 public:
     static constexpr int WIDTH = 800;

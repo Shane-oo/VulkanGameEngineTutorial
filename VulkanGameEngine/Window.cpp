@@ -5,6 +5,7 @@
 #include "Window.h"
 
 #include <utility>
+#include <stdexcept>
 
 void Window::initWindow() {
     glfwInit();
@@ -29,4 +30,10 @@ Window::~Window() {
 
 bool Window::ShouldClose() {
     return glfwWindowShouldClose(window);
+}
+
+void Window::CreateWindowSurface(VkInstance instance, VkSurfaceKHR *surface) {
+    if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create Window surface");
+    }
 }

@@ -12,7 +12,9 @@ add_executable (VulkanGameEngine "VulkanGameEngine.cpp" "VulkanGameEngine.h"
         FirstApp.cpp
         FirstApp.h
         PipeLine.cpp
-        PipeLine.h)
+        PipeLine.h
+        EngineDevice.h
+        EngineDevice.cpp)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VulkanGameEngine PROPERTY CXX_STANDARD 20)

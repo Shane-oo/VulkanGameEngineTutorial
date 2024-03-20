@@ -29,6 +29,8 @@ public:
     Window &operator=(const Window &) = delete;
     
     bool ShouldClose();
+    
+    void CreateWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 };
 
 
