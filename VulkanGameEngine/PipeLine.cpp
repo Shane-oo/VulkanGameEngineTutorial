@@ -66,13 +66,20 @@ void PipeLine::CreateGraphicsPipeline(const std::string &vertexFilePath, const s
     vertexInputInfo.pVertexAttributeDescriptions = nullptr;
     vertexInputInfo.pVertexBindingDescriptions = nullptr;
 
+    VkPipelineViewportStateCreateInfo viewportInfo = VkPipelineViewportStateCreateInfo();
+    viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewportInfo.viewportCount = 1;
+    viewportInfo.pViewports = &configInfo.viewport;
+    viewportInfo.scissorCount = 1;
+    viewportInfo.pScissors = &configInfo.scissor;
+
     VkGraphicsPipelineCreateInfo pipelineInfo = VkGraphicsPipelineCreateInfo();
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = 2;
     pipelineInfo.pStages = shaderStages;
     pipelineInfo.pVertexInputState = &vertexInputInfo;
     pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
-    pipelineInfo.pViewportState = &configInfo.viewportInfo;
+    pipelineInfo.pViewportState = &viewportInfo;
     pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
     pipelineInfo.pMultisampleState = &configInfo.multiSampleInfo;
     pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
@@ -147,12 +154,6 @@ PipeLineConfigInfo PipeLine::defaultPipelineConfigInfo(uint32_t width, uint32_t 
     // any pixels outside our viewport width and height will be cut
     configInfo.scissor.offset = {0, 0};
     configInfo.scissor.extent = {width, height};
-
-    configInfo.viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    configInfo.viewportInfo.viewportCount = 1;
-    configInfo.viewportInfo.pViewports = &configInfo.viewport;
-    configInfo.viewportInfo.scissorCount = 1;
-    configInfo.viewportInfo.pScissors = &configInfo.scissor;
 
     // Rasterization
     configInfo.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;

@@ -30,6 +30,8 @@ public:
     
     bool ShouldClose();
     
+    VkExtent2D GetExtent();
+    
     void CreateWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 };
 
