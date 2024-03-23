@@ -10,24 +10,9 @@
 #include "Window.h"
 #include "PipeLine.h"
 #include "EngineSwapChain.hpp"
+#include "Model.h"
 
 class FirstApp {
-private:
-    Window window = Window(WIDTH, HEIGHT, "Hello Vulkan!");
-    EngineDevice engineDevice = EngineDevice(window);
-    EngineSwapChain engineSwapChain = EngineSwapChain(engineDevice, window.GetExtent());
-    std::unique_ptr<PipeLine> pipeline;
-    VkPipelineLayout pipelineLayout;
-    std::vector<VkCommandBuffer> commandBuffers;
-
-    void createPipelineLayout();
-
-    void createPipeline();
-
-    void createCommandBuffers();
-
-    void drawFame();
-
 public:
     static constexpr int WIDTH = 800;
     static constexpr int HEIGHT = 600;
@@ -41,6 +26,26 @@ public:
     FirstApp &operator=(const FirstApp &) = delete;
 
     void Run();
+
+private:
+    Window window = Window(WIDTH, HEIGHT, "Hello Vulkan!");
+    EngineDevice engineDevice = EngineDevice(window);
+    EngineSwapChain engineSwapChain = EngineSwapChain(engineDevice, window.GetExtent());
+    std::unique_ptr<PipeLine> pipeline;
+    VkPipelineLayout pipelineLayout;
+    std::vector<VkCommandBuffer> commandBuffers;
+    std::unique_ptr<Model> model;
+
+
+    void createPipelineLayout();
+
+    void createPipeline();
+
+    void createCommandBuffers();
+
+    void drawFame();
+    
+    void loadModels();
 };
 
 

@@ -68,7 +68,8 @@ void FirstApp::createCommandBuffers() {
         vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         pipeline->Bind(commandBuffers[i]);
-        vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+        model->Bind(commandBuffers[i]);
+        model->Draw(commandBuffers[i]);
 
         vkCmdEndRenderPass(commandBuffers[i]);
 
@@ -79,17 +80,31 @@ void FirstApp::createCommandBuffers() {
 }
 
 void FirstApp::drawFame() {
-     uint32_t imageIndex;
-     auto result = engineSwapChain.acquireNextImage(&imageIndex);
-     
-     if(result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR){
-         throw std::runtime_error("failed to acquire swap chain image");
-     }
-     
-     result = engineSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
-     if(result != VK_SUCCESS){
-         throw std::runtime_error("failed to present swap chain image");
-     }
+    uint32_t imageIndex;
+    auto result = engineSwapChain.acquireNextImage(&imageIndex);
+
+    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+        throw std::runtime_error("failed to acquire swap chain image");
+    }
+
+    result = engineSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to present swap chain image");
+    }
+}
+
+void FirstApp::loadModels() {
+    std::vector<Model::Vertex> vertices = {
+            {{-0.25f,  -0.75f}},
+            {{0.25f,  0.25f}},
+            {{-0.75f, 0.25f}},
+
+            {{0.25f,  0.75f}},
+            {{-0.25f,  -0.25f}},
+            {{0.75f, -0.25f}},
+    };
+    
+    model = std::make_unique<Model>(engineDevice, vertices);
 }
 
 // #endregion
@@ -97,6 +112,7 @@ void FirstApp::drawFame() {
 // #region Constructors
 
 FirstApp::FirstApp() {
+    loadModels();
     createPipelineLayout();
     createPipeline();
     createCommandBuffers();
@@ -118,6 +134,8 @@ void FirstApp::Run() {
 
     vkDeviceWaitIdle(engineDevice.device());
 }
+
+
 
 // #endregion
 
