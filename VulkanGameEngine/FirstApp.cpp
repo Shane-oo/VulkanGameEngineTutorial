@@ -95,15 +95,11 @@ void FirstApp::drawFame() {
 
 void FirstApp::loadModels() {
     std::vector<Model::Vertex> vertices = {
-            {{-0.25f,  -0.75f}},
-            {{0.25f,  0.25f}},
-            {{-0.75f, 0.25f}},
-
-            {{0.25f,  0.75f}},
-            {{-0.25f,  -0.25f}},
-            {{0.75f, -0.25f}},
+            {{0.0f,  -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f,  0.5f},  {0.0f, 1.0f, 0.0f}},
+            {{-0.5f, 0.5f},  {0.0f, 0.0f, 1.0f}}
     };
-    
+
     model = std::make_unique<Model>(engineDevice, vertices);
 }
 
