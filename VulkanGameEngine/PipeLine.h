@@ -49,6 +49,8 @@ public:
     PipeLine operator=(const PipeLine &) = delete;
 
     static PipeLineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
+    
+    void Bind(VkCommandBuffer commandBuffer);
 };
 
 

@@ -3,6 +3,7 @@
 //
 
 #include <stdexcept>
+#include <array>
 #include "FirstApp.h"
 
 // #region Private Methods
@@ -30,11 +31,65 @@ void FirstApp::createPipeline() {
 }
 
 void FirstApp::createCommandBuffers() {
+    commandBuffers.resize(engineSwapChain.imageCount());
 
+    VkCommandBufferAllocateInfo allocateInfo = VkCommandBufferAllocateInfo();
+    allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocateInfo.commandPool = engineDevice.getCommandPool();
+    allocateInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
+
+    if (vkAllocateCommandBuffers(engineDevice.device(), &allocateInfo, commandBuffers.data()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate command buffers!");
+    }
+
+    for (int i = 0; i < commandBuffers.size(); i++) {
+        VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo();
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
+            throw std::runtime_error("failed to being recording command buffer!");
+        }
+
+        VkRenderPassBeginInfo renderPassBeginInfo = VkRenderPassBeginInfo();
+        renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassBeginInfo.renderPass = engineSwapChain.getRenderPass();
+        renderPassBeginInfo.framebuffer = engineSwapChain.getFrameBuffer(i);
+
+        renderPassBeginInfo.renderArea.offset = VkOffset2D(0, 0);
+        renderPassBeginInfo.renderArea.extent = engineSwapChain.getSwapChainExtent();
+
+        std::array<VkClearValue, 2> clearValues = std::array<VkClearValue, 2>();
+        clearValues[0].color = VkClearColorValue{0.1f, 0.1f, 0.1f, 1.0f};
+        clearValues[1].depthStencil = VkClearDepthStencilValue{1.0f, 0};
+        renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassBeginInfo.pClearValues = clearValues.data();
+
+        vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        pipeline->Bind(commandBuffers[i]);
+        vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+
+        vkCmdEndRenderPass(commandBuffers[i]);
+
+        if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to record command buffer!");
+        }
+    }
 }
 
 void FirstApp::drawFame() {
-
+     uint32_t imageIndex;
+     auto result = engineSwapChain.acquireNextImage(&imageIndex);
+     
+     if(result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR){
+         throw std::runtime_error("failed to acquire swap chain image");
+     }
+     
+     result = engineSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+     if(result != VK_SUCCESS){
+         throw std::runtime_error("failed to present swap chain image");
+     }
 }
 
 // #endregion
@@ -58,7 +113,10 @@ void FirstApp::Run() {
     while (!window.ShouldClose()) {
         // listen for keystrokes or close button
         glfwPollEvents();
+        drawFame();
     }
+
+    vkDeviceWaitIdle(engineDevice.device());
 }
 
 // #endregion
