@@ -11,13 +11,6 @@
 #include <string>
 
 class Window {
-private:
-    int width;
-    int height;
-    std::string windowName;
-    GLFWwindow *window;
-
-    void initWindow();
 
 public:
     Window(int width, int height, std::string windowName);
@@ -26,13 +19,28 @@ public:
 
     // don't accidentally copy Window leading to two pointers to GLFWWindow, and making a dangling pointer
     Window(const Window &) = delete;
+
     Window &operator=(const Window &) = delete;
-    
+
     bool ShouldClose();
-    
+
     VkExtent2D GetExtent();
-    
+
     void CreateWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+
+    bool WasWindowResized() { return frameBufferResized; };
+
+    void ResetWindowResizedFlag() { frameBufferResized = false; };
+
+private:
+    static void frameBufferResizedCallback(GLFWwindow *instance, int width, int height);
+    int width;
+    int height;
+    bool frameBufferResized = false;
+    std::string windowName;
+    GLFWwindow *window;
+
+    void initWindow();
 };
 
 

@@ -11,14 +11,18 @@
 #include "EngineDevice.h"
 
 struct PipeLineConfigInfo {
-    VkViewport viewport;
-    VkRect2D scissor;
+/*    PipeLineConfigInfo(const PipeLineConfigInfo&) = delete;
+    PipeLineConfigInfo& operator=(const PipeLineConfigInfo&) = delete;*/
+
+    VkPipelineViewportStateCreateInfo viewportInfo;
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
     VkPipelineRasterizationStateCreateInfo rasterizationInfo;
     VkPipelineMultisampleStateCreateInfo multiSampleInfo;
     VkPipelineColorBlendAttachmentState colorBlendAttachment;
     VkPipelineColorBlendStateCreateInfo colorBlendInfo;
     VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+    std::vector<VkDynamicState> dynamicStateEnables;
+    VkPipelineDynamicStateCreateInfo dynamicStateInfo;
     VkPipelineLayout pipelineLayout = nullptr;
     VkRenderPass renderPass = nullptr;
     uint32_t subPass = 0;
@@ -46,10 +50,9 @@ public:
 
     PipeLine(const PipeLine &) = delete;
 
-    PipeLine operator=(const PipeLine &) = delete;
+    PipeLine &operator=(const PipeLine &) = delete;
 
-    static PipeLineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
-    
+    static void defaultPipelineConfigInfo(PipeLineConfigInfo& configInfo);
     void Bind(VkCommandBuffer commandBuffer);
 };
 

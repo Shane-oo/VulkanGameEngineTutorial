@@ -30,7 +30,7 @@ public:
 private:
     Window window = Window(WIDTH, HEIGHT, "Hello Vulkan!");
     EngineDevice engineDevice = EngineDevice(window);
-    EngineSwapChain engineSwapChain = EngineSwapChain(engineDevice, window.GetExtent());
+    std::unique_ptr<EngineSwapChain> engineSwapChain;
     std::unique_ptr<PipeLine> pipeline;
     VkPipelineLayout pipelineLayout;
     std::vector<VkCommandBuffer> commandBuffers;
@@ -43,9 +43,14 @@ private:
 
     void createCommandBuffers();
 
+    void freeCommandBuffers();
+    
     void drawFame();
     
     void loadModels();
+    
+    void recreateSwapChain();
+    void recordCommandBuffer(int imageIndex);
 };
 
 
