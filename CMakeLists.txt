@@ -9,11 +9,6 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("VulkanGameEngineTutorial")
-
-# Include sub-projects.
-add_subdirectory ("VulkanGameEngine")
-
 # run commands
 if(WIN32)
   execute_process(COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_SOURCE_DIR} cmd.exe /c "compile.bat"
@@ -28,6 +23,13 @@ if(WIN32)
   endif()
 endif()
 
-#1234567
+project ("VulkanGameEngineTutorial")
+
+# Include sub-projects.
+add_subdirectory ("VulkanGameEngine")
+
+
+
+#123456789
 
 

@@ -1,19 +1,34 @@
 //
 // Created by ShaneMonck on 20/03/2024.
 //
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
+#include <glm/glm.hpp>
 
 #include <stdexcept>
 #include <array>
 #include "FirstApp.h"
 
+
+struct SimplePushConstantData {
+    glm::vec2 offset;
+    alignas(16) glm::vec3 color;
+};
+
 // #region Private Methods
 void FirstApp::createPipelineLayout() {
+    VkPushConstantRange pushConstantRange = VkPushConstantRange();
+    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    pushConstantRange.offset = 0;
+    pushConstantRange.size = sizeof(SimplePushConstantData);
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = VkPipelineLayoutCreateInfo();
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 0;
     pipelineLayoutInfo.pSetLayouts = nullptr;
-    pipelineLayoutInfo.pushConstantRangeCount = 0;
-    pipelineLayoutInfo.pPushConstantRanges = nullptr;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
     if (vkCreatePipelineLayout(engineDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
@@ -23,7 +38,7 @@ void FirstApp::createPipelineLayout() {
 void FirstApp::createPipeline() {
     assert(engineSwapChain != nullptr && "Cannot create pipeline before swap chain");
     assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
-    
+
     PipeLineConfigInfo pipeLineConfig{};
     PipeLine::defaultPipelineConfigInfo(pipeLineConfig);
     pipeLineConfig.renderPass = engineSwapChain->getRenderPass();
@@ -54,7 +69,7 @@ void FirstApp::freeCommandBuffers() {
                          engineDevice.getCommandPool(),
                          static_cast<uint32_t>( commandBuffers.size()),
                          commandBuffers.data());
-    
+
     commandBuffers.clear();
 }
 
@@ -97,6 +112,9 @@ void FirstApp::loadModels() {
 }
 
 void FirstApp::recordCommandBuffer(int imageIndex) {
+    static int frame = 0;
+    frame = (frame + 1) % 1000;
+
     VkCommandBufferBeginInfo beginInfo = VkCommandBufferBeginInfo();
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -113,7 +131,7 @@ void FirstApp::recordCommandBuffer(int imageIndex) {
     renderPassBeginInfo.renderArea.extent = engineSwapChain->getSwapChainExtent();
 
     std::array<VkClearValue, 2> clearValues = std::array<VkClearValue, 2>();
-    clearValues[0].color = VkClearColorValue{0.1f, 0.1f, 0.1f, 1.0f};
+    clearValues[0].color = VkClearColorValue{0.01f, 0.01f, 0.01f, 1.0f};
     clearValues[1].depthStencil = VkClearDepthStencilValue{1.0f, 0};
     renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassBeginInfo.pClearValues = clearValues.data();
@@ -134,7 +152,21 @@ void FirstApp::recordCommandBuffer(int imageIndex) {
 
     pipeline->Bind(commandBuffers[imageIndex]);
     model->Bind(commandBuffers[imageIndex]);
-    model->Draw(commandBuffers[imageIndex]);
+
+    for (float j = 0.0; j < 4; j++) {
+        SimplePushConstantData pushConstantData = SimplePushConstantData();
+        pushConstantData.offset = {-0.5f + frame * 0.002f, -0.4f + j * 0.25f};
+        pushConstantData.color = {0.0f, 0.0f, 0.2f + 0.2f * j};
+
+        vkCmdPushConstants(commandBuffers[imageIndex],
+                           pipelineLayout,
+                           VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                           0,
+                           sizeof(SimplePushConstantData),
+                           &pushConstantData);
+        model->Draw(commandBuffers[imageIndex]);
+    }
+
 
     vkCmdEndRenderPass(commandBuffers[imageIndex]);
 
@@ -157,7 +189,7 @@ void FirstApp::recreateSwapChain() {
         engineSwapChain = std::make_unique<EngineSwapChain>(engineDevice, extent);
     } else {
         engineSwapChain = std::make_unique<EngineSwapChain>(engineDevice, extent, std::move(engineSwapChain));
-        if(engineSwapChain->imageCount() != commandBuffers.size()) {
+        if (engineSwapChain->imageCount() != commandBuffers.size()) {
             freeCommandBuffers();
             createCommandBuffers();
         }

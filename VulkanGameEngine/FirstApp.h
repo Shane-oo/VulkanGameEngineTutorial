@@ -44,12 +44,13 @@ private:
     void createCommandBuffers();
 
     void freeCommandBuffers();
-    
+
     void drawFame();
-    
+
     void loadModels();
-    
+
     void recreateSwapChain();
+
     void recordCommandBuffer(int imageIndex);
 };
 

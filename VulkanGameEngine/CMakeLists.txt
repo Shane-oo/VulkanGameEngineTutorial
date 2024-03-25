@@ -1,7 +1,7 @@
 ﻿# CMakeList.txt : CMake project for VulkanGameEngine, include source and define
 # project specific logic here.
 #
-# Copy the shaders folder to the build and binary directory
+# Copy the shaders folder to the build and binary directory 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 
