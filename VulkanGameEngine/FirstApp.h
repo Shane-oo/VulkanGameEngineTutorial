@@ -8,9 +8,8 @@
 
 #include <memory>
 #include "Window.h"
-#include "PipeLine.h"
-#include "EngineSwapChain.hpp"
 #include "GameObject.h"
+#include "Renderer.h"
 
 class FirstApp {
 public:
@@ -30,30 +29,11 @@ public:
 private:
     Window window = Window(WIDTH, HEIGHT, "Hello Vulkan!");
     EngineDevice engineDevice = EngineDevice(window);
-    std::unique_ptr<EngineSwapChain> engineSwapChain;
-    std::unique_ptr<PipeLine> pipeline;
-    VkPipelineLayout pipelineLayout;
-    std::vector<VkCommandBuffer> commandBuffers;
+    Renderer renderer = Renderer(window, engineDevice);
+
     std::vector<GameObject> gameObjects;
-
-
-    void createPipelineLayout();
-
-    void createPipeline();
-
-    void createCommandBuffers();
-
-    void freeCommandBuffers();
-
-    void drawFame();
-
-    void loadGameObjects();
-
-    void recreateSwapChain();
-
-    void recordCommandBuffer(int imageIndex);
     
-    void renderGameObjects(VkCommandBuffer commandBuffer);
+    void loadGameObjects();
 };
 
 
