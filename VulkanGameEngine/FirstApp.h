@@ -34,6 +34,10 @@ private:
     std::vector<GameObject> gameObjects;
     
     void loadGameObjects();
+
+    std::unique_ptr<Model> CreateSquareModel(EngineDevice& device, glm::vec2 offset);
+
+    std::unique_ptr<Model> CreateCircleModel(EngineDevice& device, unsigned int numSides);
 };
 
 

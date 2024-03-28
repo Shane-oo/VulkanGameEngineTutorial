@@ -24,7 +24,11 @@ add_executable (VulkanGameEngine "VulkanGameEngine.cpp" "VulkanGameEngine.h"
         Renderer.cpp
         Renderer.h
         SimpleRenderSystem.cpp
-        SimpleRenderSystem.h)
+        SimpleRenderSystem.h
+        Systems/GravityPhysicsSystem.cpp
+        Systems/GravityPhysicsSystem.h
+        Systems/Vec2FieldSystem.cpp
+        Systems/Vec2FieldSystem.h)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VulkanGameEngine PROPERTY CXX_STANDARD 20)

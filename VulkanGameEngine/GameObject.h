@@ -24,11 +24,16 @@ struct Transform2DComponent {
     }
 };
 
+struct RigidBody2dComponent {
+    glm::vec2 velocity;
+    float mass = 1.0f;
+};
+
 class GameObject {
 public:
     using id_t = unsigned int;
 
-    static GameObject createGameObject() {
+    static GameObject CreateGameObject() {
         static id_t currentId = 0;
         return GameObject(currentId++);
     }
@@ -43,9 +48,10 @@ public:
 
     id_t getId() const { return id; }
 
-    std::shared_ptr<Model> model = std::shared_ptr<Model>();              // hmm he removed the initalisers here
+    std::shared_ptr<Model> model = std::shared_ptr<Model>();
     glm::vec3 color = glm::vec3();
     Transform2DComponent transform2DComponent = Transform2DComponent();
+    RigidBody2dComponent rigidBody2DComponent = RigidBody2dComponent();
 
 private:
     explicit GameObject(id_t id) {
