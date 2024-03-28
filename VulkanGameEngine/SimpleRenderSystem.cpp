@@ -19,8 +19,7 @@
 
 
 struct SimplePushConstantData {
-    glm::mat2 transform = glm::mat2(1.f); // default identity matrix
-    glm::vec2 offset;
+    glm::mat4 transform = glm::mat4(1.f); // default identity matrix
     alignas(16) glm::vec3 color;
 };
 
@@ -80,12 +79,12 @@ void SimpleRenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::v
     pipeline->Bind(commandBuffer);
 
     for (auto &obj: gameObjects) {
-        obj.transform2DComponent.Rotation = glm::mod(obj.transform2DComponent.Rotation + 0.001f, glm::two_pi<float>());
+        obj.transformComponent.Rotation.y = glm::mod(obj.transformComponent.Rotation.y + 0.001f, glm::two_pi<float>());
+        obj.transformComponent.Rotation.x = glm::mod(obj.transformComponent.Rotation.x + 0.0005f, glm::two_pi<float>());
 
         SimplePushConstantData pushConstantData = SimplePushConstantData();
-        pushConstantData.offset = obj.transform2DComponent.Translation;
         pushConstantData.color = obj.color;
-        pushConstantData.transform = obj.transform2DComponent.mat2();
+        pushConstantData.transform = obj.transformComponent.mat4();
 
         vkCmdPushConstants(commandBuffer,
                            pipelineLayout,
