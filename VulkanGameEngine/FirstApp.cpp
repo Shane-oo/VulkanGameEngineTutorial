@@ -101,6 +101,12 @@ void FirstApp::Run() {
   SimpleRenderSystem simpleRenderSystem =
       SimpleRenderSystem(engineDevice, renderer.GetSwapChainRederPass());
   Camera camera = Camera();
+  glm::vec3 position = glm::vec3(-1.f, -2.f, -7f);
+  glm::vec3 direction = glm::vec3(0.5f, 0.f, 1.f);
+  //camera.SetViewDirection(position, direction);
+  glm::vec3 target = glm::vec3(0.f, 0.f, 2.5f);
+  camera.SetViewTarget(position, target);
+  
 
   while (!window.ShouldClose()) {
     // listen for keystrokes or close button
