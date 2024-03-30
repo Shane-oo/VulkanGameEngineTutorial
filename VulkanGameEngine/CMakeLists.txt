@@ -24,7 +24,9 @@ add_executable (VulkanGameEngine "VulkanGameEngine.cpp" "VulkanGameEngine.h"
         Renderer.cpp
         Renderer.h
         SimpleRenderSystem.cpp
-        SimpleRenderSystem.h)
+        SimpleRenderSystem.h
+        Camera.cpp
+        Camera.h)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VulkanGameEngine PROPERTY CXX_STANDARD 20)

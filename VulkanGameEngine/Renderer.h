@@ -5,61 +5,63 @@
 #ifndef VULKANGAMEENGINETUTORIAL_RENDERER_H
 #define VULKANGAMEENGINETUTORIAL_RENDERER_H
 
-
-#include <memory>
-#include <cassert>
-#include "Window.h"
 #include "EngineSwapChain.hpp"
-
+#include "Window.h"
+#include <cassert>
+#include <memory>
 
 class Renderer {
 public:
-    Renderer(Window &window, EngineDevice &device);
+  Renderer(Window &window, EngineDevice &device);
 
-    ~Renderer();
+  ~Renderer();
 
-    Renderer(const Renderer &) = delete;
+  Renderer(const Renderer &) = delete;
 
-    Renderer &operator=(const Renderer &) = delete;
+  Renderer &operator=(const Renderer &) = delete;
 
-    VkRenderPass GetSwapChainRederPass() const { return engineSwapChain->getRenderPass(); }
+  VkRenderPass GetSwapChainRederPass() const {
+    return engineSwapChain->getRenderPass();
+  }
 
-    bool IsDrawFrameInProgress() const { return isDrawFrameStarted; }
+  float GetAspectRatio() const { return engineSwapChain->extentAspectRatio(); }
 
-    VkCommandBuffer GetCurrentCommandBuffer() const {
-        assert(isDrawFrameStarted && "Cannot get command buffer when draw frame not in progress");
-        return commandBuffers[currentFrameIndex];
-    }
+  bool IsDrawFrameInProgress() const { return isDrawFrameStarted; }
 
-    VkCommandBuffer BeginDrawFrame();
+  VkCommandBuffer GetCurrentCommandBuffer() const {
+    assert(isDrawFrameStarted &&
+           "Cannot get command buffer when draw frame not in progress");
+    return commandBuffers[currentFrameIndex];
+  }
 
-    void EndDrawFrame();
+  VkCommandBuffer BeginDrawFrame();
 
-    void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
+  void EndDrawFrame();
 
-    void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
+  void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
-    int GetFrameIndex() const {
-        assert(isDrawFrameStarted && "Cannot GetFrameIndex when draw frame not in progress");
-        return currentFrameIndex;
-    }
+  void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
+
+  int GetFrameIndex() const {
+    assert(isDrawFrameStarted &&
+           "Cannot GetFrameIndex when draw frame not in progress");
+    return currentFrameIndex;
+  }
 
 private:
-    Window &window;
-    EngineDevice &engineDevice;
-    std::unique_ptr<EngineSwapChain> engineSwapChain;
-    std::vector<VkCommandBuffer> commandBuffers;
-    uint32_t currentImageIndex;
-    int currentFrameIndex = 0;
-    bool isDrawFrameStarted = false;
+  Window &window;
+  EngineDevice &engineDevice;
+  std::unique_ptr<EngineSwapChain> engineSwapChain;
+  std::vector<VkCommandBuffer> commandBuffers;
+  uint32_t currentImageIndex;
+  int currentFrameIndex = 0;
+  bool isDrawFrameStarted = false;
 
-    void createCommandBuffers();
+  void createCommandBuffers();
 
-    void freeCommandBuffers();
+  void freeCommandBuffers();
 
-    void recreateSwapChain();
-
+  void recreateSwapChain();
 };
 
-
-#endif //VULKANGAMEENGINETUTORIAL_RENDERER_H
+#endif // VULKANGAMEENGINETUTORIAL_RENDERER_H

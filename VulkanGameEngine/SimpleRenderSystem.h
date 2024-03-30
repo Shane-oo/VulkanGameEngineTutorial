@@ -5,7 +5,7 @@
 #ifndef VULKANGAMEENGINETUTORIAL_SIMPLERENDERSYSTEM_H
 #define VULKANGAMEENGINETUTORIAL_SIMPLERENDERSYSTEM_H
 
-
+#include "Camera.h"
 #include "EngineDevice.h"
 #include "GameObject.h"
 #include "PipeLine.h"
@@ -21,7 +21,7 @@ public:
 
     SimpleRenderSystem &operator=(const SimpleRenderSystem &) = delete;
 
-    void RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects);
+    void RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects, const Camera& camera);
 
 private:
     EngineDevice &engineDevice;
