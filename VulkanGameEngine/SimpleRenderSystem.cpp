@@ -82,11 +82,6 @@ void SimpleRenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer,
   auto projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
   
   for (auto &obj : gameObjects) {
-    obj.transformComponent.Rotation.y = glm::mod(
-        obj.transformComponent.Rotation.y + 0.001f, glm::two_pi<float>());
-    obj.transformComponent.Rotation.x = glm::mod(
-        obj.transformComponent.Rotation.x + 0.0005f, glm::two_pi<float>());
-
     SimplePushConstantData pushConstantData = SimplePushConstantData();
     pushConstantData.color = obj.color;
     pushConstantData.transform = projectionView * obj.transformComponent.mat4();

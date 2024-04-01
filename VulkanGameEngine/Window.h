@@ -13,35 +13,38 @@
 class Window {
 
 public:
-    Window(int width, int height, std::string windowName);
+  Window(int width, int height, std::string windowName);
 
-    ~Window();
+  ~Window();
 
-    // don't accidentally copy Window leading to two pointers to GLFWWindow, and making a dangling pointer
-    Window(const Window &) = delete;
+  // don't accidentally copy Window leading to two pointers to GLFWWindow, and
+  // making a dangling pointer
+  Window(const Window &) = delete;
 
-    Window &operator=(const Window &) = delete;
+  Window &operator=(const Window &) = delete;
 
-    bool ShouldClose();
+  bool ShouldClose();
 
-    VkExtent2D GetExtent();
+  VkExtent2D GetExtent();
 
-    void CreateWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+  void CreateWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 
-    bool WasWindowResized() { return frameBufferResized; };
+  bool WasWindowResized() { return frameBufferResized; };
 
-    void ResetWindowResizedFlag() { frameBufferResized = false; };
+  void ResetWindowResizedFlag() { frameBufferResized = false; };
+
+  GLFWwindow *GetGLFWWindow() const { return window; };
 
 private:
-    static void frameBufferResizedCallback(GLFWwindow *instance, int width, int height);
-    int width;
-    int height;
-    bool frameBufferResized = false;
-    std::string windowName;
-    GLFWwindow *window;
+  static void frameBufferResizedCallback(GLFWwindow *instance, int width,
+                                         int height);
+  int width;
+  int height;
+  bool frameBufferResized = false;
+  std::string windowName;
+  GLFWwindow *window;
 
-    void initWindow();
+  void initWindow();
 };
 
-
-#endif //VULKANGAMEENGINETUTORIAL_WINDOW_H
+#endif // VULKANGAMEENGINETUTORIAL_WINDOW_H
