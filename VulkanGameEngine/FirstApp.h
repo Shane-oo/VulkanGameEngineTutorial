@@ -35,7 +35,6 @@ private:
     
     void loadGameObjects();
 
-    std::unique_ptr<Model> createCubeModel(EngineDevice &device, glm::vec3 offset);
 };
 
 

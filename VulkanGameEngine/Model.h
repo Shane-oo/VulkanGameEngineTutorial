@@ -8,55 +8,69 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
+#include <tiny_obj_loader.h>
 #include <glm/glm.hpp>
 #include <vector>
+#include <memory>
 
 #include "EngineDevice.h"
 
 class Model {
 
 public:
-  struct Vertex {
-    glm::vec3 position;
-    glm::vec3 color;
+    struct Vertex {
+        glm::vec3 position;
+        glm::vec3 color;
+        glm::vec3 normal;
+        glm::vec2 uv;
 
-    static std::vector<VkVertexInputBindingDescription>
-    GetBindingDescriptions();
 
-    static std::vector<VkVertexInputAttributeDescription>
-    GetAttributeDescriptions();
-  };
+        static std::vector<VkVertexInputBindingDescription>
+        GetBindingDescriptions();
 
-  struct Builder {
-    std::vector<Vertex> vertices = std::vector<Vertex>();
-    std::vector<uint32_t> indices = std::vector<uint32_t>();
-  };
+        static std::vector<VkVertexInputAttributeDescription>
+        GetAttributeDescriptions();
 
-  Model(EngineDevice &device, const Model::Builder &builder);
+        bool operator==(const Vertex &other) const {
+            return position == other.position && color == other.color && normal == other.normal && uv == other.uv;
+        }
+    };
 
-  ~Model();
+    struct Builder {
+        std::vector<Vertex> vertices = std::vector<Vertex>();
+        std::vector<uint32_t> indices = std::vector<uint32_t>();
 
-  Model(const Model &) = delete;
+        void loadModel(const std::string &filePath);
+    };
 
-  Model &operator=(const Model &) = delete;
+    Model(EngineDevice &device, const Model::Builder &builder);
 
-  void Bind(VkCommandBuffer commandBuffer);
+    ~Model();
 
-  void Draw(VkCommandBuffer commandBuffer);
+    static std::unique_ptr<Model> CreateModelFromFile(EngineDevice &device, const std::string &filePath);
+
+    Model(const Model &) = delete;
+
+    Model &operator=(const Model &) = delete;
+
+    void Bind(VkCommandBuffer commandBuffer);
+
+    void Draw(VkCommandBuffer commandBuffer);
 
 private:
-  EngineDevice &engineDevice;
-  VkBuffer vertexBuffer;
-  VkDeviceMemory vertexBufferMemory;
-  uint32_t vertexCount;
+    EngineDevice &engineDevice;
+    VkBuffer vertexBuffer;
+    VkDeviceMemory vertexBufferMemory;
+    uint32_t vertexCount;
 
-  bool hasIndexBuffer = false;
-  VkBuffer indexBuffer;
-  VkDeviceMemory indexBufferMemory;
-  uint32_t indexCount;
+    bool hasIndexBuffer = false;
+    VkBuffer indexBuffer;
+    VkDeviceMemory indexBufferMemory;
+    uint32_t indexCount;
 
-  void createVertexBuffers(const std::vector<Vertex> &vertices);
-  void createIndexBuffers(const std::vector<uint32_t> &indices);
+    void createVertexBuffers(const std::vector<Vertex> &vertices);
+
+    void createIndexBuffers(const std::vector<uint32_t> &indices);
 };
 
 #endif // VULKANGAMEENGINETUTORIAL_MODEL_H

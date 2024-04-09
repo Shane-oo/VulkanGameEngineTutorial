@@ -2,92 +2,111 @@
 // Created by ShaneMonck on 23/03/2024.
 //
 
+
+#define GLM_ENABLE_EXPERIMENTAL
+
+#include <glm/gtx/hash.hpp>
+
+#include <stdexcept>
 #include "Model.h"
+#include "Utils.h"
+#include <unordered_map>
+
+namespace std {
+    template<>
+    struct hash<Model::Vertex> {
+        size_t operator()(Model::Vertex const &vertex) const {
+            size_t seed = 0;
+            hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+            return seed;
+        }
+    };
+}
 
 // #region Private Methods
 
 void Model::createVertexBuffers(const std::vector<Vertex> &vertices) {
-  vertexCount = static_cast<uint32_t>(vertices.size());
-  assert(vertexCount >= 3 && "Vertex count must be at least 3");
+    vertexCount = static_cast<uint32_t>(vertices.size());
+    assert(vertexCount >= 3 && "Vertex count must be at least 3");
 
-  VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
+    VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
 
-  VkBuffer stagingBuffer = VkBuffer();
-  VkDeviceMemory stagingBufferMemory = VkDeviceMemory();
-  engineDevice.createBuffer(
-      bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // cpu | gpu
-      stagingBuffer, stagingBufferMemory);
+    VkBuffer stagingBuffer = VkBuffer();
+    VkDeviceMemory stagingBufferMemory = VkDeviceMemory();
+    engineDevice.createBuffer(
+            bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // cpu | gpu
+            stagingBuffer, stagingBufferMemory);
 
-  void *data;
-  vkMapMemory(engineDevice.device(), stagingBufferMemory, 0, bufferSize, 0,
-              &data);
-  memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-  vkUnmapMemory(engineDevice.device(), stagingBufferMemory);
+    void *data;
+    vkMapMemory(engineDevice.device(), stagingBufferMemory, 0, bufferSize, 0,
+                &data);
+    memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
+    vkUnmapMemory(engineDevice.device(), stagingBufferMemory);
 
-  engineDevice.createBuffer(
-      bufferSize,
-      VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
-  
-  engineDevice.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-  
-  vkDestroyBuffer(engineDevice.device(), stagingBuffer, nullptr);
-  vkFreeMemory(engineDevice.device(), stagingBufferMemory, nullptr);
+    engineDevice.createBuffer(
+            bufferSize,
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+
+    engineDevice.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+    vkDestroyBuffer(engineDevice.device(), stagingBuffer, nullptr);
+    vkFreeMemory(engineDevice.device(), stagingBufferMemory, nullptr);
 }
 
 void Model::createIndexBuffers(const std::vector<uint32_t> &indices) {
-  indexCount = static_cast<uint32_t>(indices.size());
-  hasIndexBuffer = indexCount > 0;
+    indexCount = static_cast<uint32_t>(indices.size());
+    hasIndexBuffer = indexCount > 0;
 
-  if (!hasIndexBuffer) {
-    return;
-  }
+    if (!hasIndexBuffer) {
+        return;
+    }
 
-  VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
+    VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
 
-  VkBuffer stagingBuffer = VkBuffer();
-  VkDeviceMemory stagingBufferMemory = VkDeviceMemory();
-  engineDevice.createBuffer(
-      bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // cpu | gpu
-      stagingBuffer, stagingBufferMemory);
-  
-  void *data;
-  vkMapMemory(engineDevice.device(), stagingBufferMemory, 0, bufferSize, 0,
-              &data);
-  memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-  vkUnmapMemory(engineDevice.device(), stagingBufferMemory);
+    VkBuffer stagingBuffer = VkBuffer();
+    VkDeviceMemory stagingBufferMemory = VkDeviceMemory();
+    engineDevice.createBuffer(
+            bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // cpu | gpu
+            stagingBuffer, stagingBufferMemory);
 
-  engineDevice.createBuffer(
-      bufferSize,
-      VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
-  
-  engineDevice.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
-  
-  vkDestroyBuffer(engineDevice.device(), stagingBuffer, nullptr);
-  vkFreeMemory(engineDevice.device(), stagingBufferMemory, nullptr);
+    void *data;
+    vkMapMemory(engineDevice.device(), stagingBufferMemory, 0, bufferSize, 0,
+                &data);
+    memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
+    vkUnmapMemory(engineDevice.device(), stagingBufferMemory);
+
+    engineDevice.createBuffer(
+            bufferSize,
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+    engineDevice.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+    vkDestroyBuffer(engineDevice.device(), stagingBuffer, nullptr);
+    vkFreeMemory(engineDevice.device(), stagingBufferMemory, nullptr);
 }
 
 // #endregion
 
 // #region Constructors
 Model::Model(EngineDevice &device, const Model::Builder &builder)
-    : engineDevice(device) {
-  createVertexBuffers(builder.vertices);
-  createIndexBuffers(builder.indices);
+        : engineDevice(device) {
+    createVertexBuffers(builder.vertices);
+    createIndexBuffers(builder.indices);
 }
 
 Model::~Model() {
-  vkDestroyBuffer(engineDevice.device(), vertexBuffer, nullptr);
-  vkFreeMemory(engineDevice.device(), vertexBufferMemory, nullptr);
-  if (hasIndexBuffer) {
-    vkDestroyBuffer(engineDevice.device(), indexBuffer, nullptr);
-    vkFreeMemory(engineDevice.device(), indexBufferMemory, nullptr);
-  }
+    vkDestroyBuffer(engineDevice.device(), vertexBuffer, nullptr);
+    vkFreeMemory(engineDevice.device(), vertexBufferMemory, nullptr);
+    if (hasIndexBuffer) {
+        vkDestroyBuffer(engineDevice.device(), indexBuffer, nullptr);
+        vkFreeMemory(engineDevice.device(), indexBufferMemory, nullptr);
+    }
 }
 
 // #endregion
@@ -96,48 +115,112 @@ Model::~Model() {
 
 std::vector<VkVertexInputBindingDescription>
 Model::Vertex::GetBindingDescriptions() {
-  std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
-  bindingDescriptions[0].binding = 0;
-  bindingDescriptions[0].stride = sizeof(Vertex);
-  bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-  return bindingDescriptions;
+    std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
+    bindingDescriptions[0].binding = 0;
+    bindingDescriptions[0].stride = sizeof(Vertex);
+    bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    return bindingDescriptions;
 }
 
 std::vector<VkVertexInputAttributeDescription>
 Model::Vertex::GetAttributeDescriptions() {
-  std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
-  attributeDescriptions[0].binding = 0;
-  attributeDescriptions[0].location = 0;
-  attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-  attributeDescriptions[0].offset = offsetof(Vertex, position);
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+    attributeDescriptions[0].binding = 0;
+    attributeDescriptions[0].location = 0;
+    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+    attributeDescriptions[0].offset = offsetof(Vertex, position);
 
-  attributeDescriptions[1].binding = 0;
-  attributeDescriptions[1].location = 1;
-  attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-  attributeDescriptions[1].offset =
-      offsetof(Vertex,
-               color); // automatically calculates the byte offset in the struct
-                       // (how many bytes until color attributes in buffer)
+    attributeDescriptions[1].binding = 0;
+    attributeDescriptions[1].location = 1;
+    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+    attributeDescriptions[1].offset =
+            offsetof(Vertex,
+                     color); // automatically calculates the byte offset in the struct
+    // (how many bytes until color attributes in buffer)
 
-  return attributeDescriptions;
+    return attributeDescriptions;
 }
 
 void Model::Draw(VkCommandBuffer commandBuffer) {
-  if (hasIndexBuffer) {
-    vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
-  } else {
-    vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
-  }
+    if (hasIndexBuffer) {
+        vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
+    } else {
+        vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
+    }
 }
 
 void Model::Bind(VkCommandBuffer commandBuffer) {
-  VkBuffer buffers[] = {vertexBuffer};
-  VkDeviceSize offsets[] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+    VkBuffer buffers[] = {vertexBuffer};
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 
-  if (hasIndexBuffer) {
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-  }
+    if (hasIndexBuffer) {
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    }
+}
+
+std::unique_ptr<Model> Model::CreateModelFromFile(EngineDevice &device, const std::string &filePath) {
+    Builder builder = Builder();
+    builder.loadModel(filePath);
+
+    printf("Vertex count: %zu", builder.vertices.size());
+
+    return std::make_unique<Model>(device, builder);
+}
+
+
+void Model::Builder::loadModel(const std::string &filePath) {
+    tinyobj::attrib_t attrib = tinyobj::attrib_t();
+    std::vector<tinyobj::shape_t> shapes = std::vector<tinyobj::shape_t>();
+    std::vector<tinyobj::material_t> materials = std::vector<tinyobj::material_t>();
+    std::string warn, err = std::string();
+
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filePath.c_str())) {
+        throw std::runtime_error(warn + err);
+    }
+
+    std::unordered_map<Vertex, uint32_t> uniqueVertices = std::unordered_map<Vertex, uint32_t>();
+
+    for (const auto &shape: shapes) {
+        for (const auto &index: shape.mesh.indices) {
+            Vertex vertex = Vertex();
+
+            if (index.vertex_index >= 0) {
+                vertex.position = glm::vec3(attrib.vertices[3 * index.vertex_index + 0],
+                                            attrib.vertices[3 * index.vertex_index + 1],
+                                            attrib.vertices[3 * index.vertex_index + 2]);
+
+
+                auto colorIndex = 3 * index.vertex_index + 2;
+                if (colorIndex < attrib.colors.size()) {
+                    vertex.color = glm::vec3(attrib.colors[colorIndex - 2],
+                                             attrib.colors[colorIndex - 1],
+                                             attrib.colors[colorIndex - 0]);
+                } else {
+                    vertex.color = glm::vec3(1.f, 1.f, 1.f);
+                }
+            }
+            if (index.normal_index >= 0) {
+                // indexed vertices
+                vertex.normal = glm::vec3(attrib.normals[3 * index.normal_index + 0],
+                                          attrib.normals[3 * index.normal_index + 1],
+                                          attrib.normals[3 * index.normal_index + 2]);
+
+            }
+            if (index.texcoord_index >= 0) {
+                // indexed vertices
+                vertex.uv = glm::vec2(attrib.texcoords[2 * index.texcoord_index + 0],
+                                      attrib.texcoords[2 * index.texcoord_index + 1]);
+            }
+
+            // index vertices
+            if (uniqueVertices.count(vertex) == 0) {
+                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                vertices.push_back(vertex);
+            }
+            indices.push_back(uniqueVertices[vertex]);
+        }
+    }
 }
 
 // #endregion
