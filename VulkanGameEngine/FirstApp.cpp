@@ -17,14 +17,22 @@
 // #region Private Methods
 
 void FirstApp::loadGameObjects() {
-    std::shared_ptr<Model> model = Model::CreateModelFromFile(engineDevice, "models/smooth_vase.obj");
+    std::shared_ptr<Model> model = Model::CreateModelFromFile(engineDevice, "models/flat_vase.obj");
 
-    auto gameObject = GameObject::createGameObject();
-    gameObject.model = model;
-    gameObject.transformComponent.Translation = glm::vec3(.0f, .0f, 2.5f);
-    gameObject.transformComponent.Scale = glm::vec3(3.f, 3.f, 3.f);
+    auto flatVase = GameObject::createGameObject();
+    flatVase.model = model;
+    flatVase.transformComponent.Translation = glm::vec3(-.5f, .5f, 2.5f);
+    flatVase.transformComponent.Scale = glm::vec3(3.f, 1.5f, 3.f);
+    gameObjects.push_back(std::move(flatVase));
 
-    gameObjects.push_back(std::move(gameObject));
+    model = Model::CreateModelFromFile(engineDevice, "models/smooth_vase.obj");
+
+    auto smoothVase = GameObject::createGameObject();
+    smoothVase.model = model;
+    smoothVase.transformComponent.Translation = glm::vec3(.5f, .5f, 2.5f);
+    smoothVase.transformComponent.Scale = glm::vec3(3.f, 1.5f, 3.f);
+
+    gameObjects.push_back(std::move(smoothVase));
 }
 
 // #endregion

@@ -124,19 +124,28 @@ Model::Vertex::GetBindingDescriptions() {
 
 std::vector<VkVertexInputAttributeDescription>
 Model::Vertex::GetAttributeDescriptions() {
-    std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
-    attributeDescriptions[0].binding = 0;
-    attributeDescriptions[0].location = 0;
-    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[0].offset = offsetof(Vertex, position);
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions = std::vector<VkVertexInputAttributeDescription>();
 
-    attributeDescriptions[1].binding = 0;
-    attributeDescriptions[1].location = 1;
-    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributeDescriptions[1].offset =
-            offsetof(Vertex,
-                     color); // automatically calculates the byte offset in the struct
-    // (how many bytes until color attributes in buffer)
+    attributeDescriptions.push_back({0,
+                                     0,
+                                     VK_FORMAT_R32G32B32_SFLOAT,
+                                     static_cast<uint32_t>(offsetof(Vertex, position))
+                                    });
+    attributeDescriptions.push_back({1,
+                                     0,
+                                     VK_FORMAT_R32G32B32_SFLOAT,
+                                     static_cast<uint32_t>(offsetof(Vertex, color))
+                                    });
+    attributeDescriptions.push_back({2,
+                                     0,
+                                     VK_FORMAT_R32G32B32_SFLOAT,
+                                     static_cast<uint32_t>(offsetof(Vertex, normal))
+                                    });
+    attributeDescriptions.push_back({3,
+                                     0,
+                                     VK_FORMAT_R32G32_SFLOAT,
+                                     static_cast<uint32_t>(offsetof(Vertex, uv))
+                                    });
 
     return attributeDescriptions;
 }
@@ -190,25 +199,18 @@ void Model::Builder::loadModel(const std::string &filePath) {
                                             attrib.vertices[3 * index.vertex_index + 1],
                                             attrib.vertices[3 * index.vertex_index + 2]);
 
+                vertex.color = glm::vec3(attrib.colors[3 * index.vertex_index + 0],
+                                         attrib.colors[3 * index.vertex_index + 1],
+                                         attrib.colors[3 * index.vertex_index + 2]);
 
-                auto colorIndex = 3 * index.vertex_index + 2;
-                if (colorIndex < attrib.colors.size()) {
-                    vertex.color = glm::vec3(attrib.colors[colorIndex - 2],
-                                             attrib.colors[colorIndex - 1],
-                                             attrib.colors[colorIndex - 0]);
-                } else {
-                    vertex.color = glm::vec3(1.f, 1.f, 1.f);
-                }
             }
             if (index.normal_index >= 0) {
-                // indexed vertices
                 vertex.normal = glm::vec3(attrib.normals[3 * index.normal_index + 0],
                                           attrib.normals[3 * index.normal_index + 1],
                                           attrib.normals[3 * index.normal_index + 2]);
 
             }
             if (index.texcoord_index >= 0) {
-                // indexed vertices
                 vertex.uv = glm::vec2(attrib.texcoords[2 * index.texcoord_index + 0],
                                       attrib.texcoords[2 * index.texcoord_index + 1]);
             }
