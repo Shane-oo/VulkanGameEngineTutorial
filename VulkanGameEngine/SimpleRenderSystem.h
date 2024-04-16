@@ -9,6 +9,7 @@
 #include "EngineDevice.h"
 #include "GameObject.h"
 #include "PipeLine.h"
+#include "FrameInfo.h"
 
 class SimpleRenderSystem {
 public:
@@ -21,7 +22,7 @@ public:
 
     SimpleRenderSystem &operator=(const SimpleRenderSystem &) = delete;
 
-    void RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject> &gameObjects, const Camera& camera);
+    void RenderGameObjects(FrameInfo &frameInfo,std::vector<GameObject> &gameObjects);
 
 private:
     EngineDevice &engineDevice;

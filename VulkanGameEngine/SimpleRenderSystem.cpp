@@ -74,12 +74,11 @@ SimpleRenderSystem::~SimpleRenderSystem() {
 
 // #region Public Methods
 
-void SimpleRenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer,
-                                           std::vector<GameObject> &gameObjects,
-                                           const Camera &camera) {
-    pipeline->Bind(commandBuffer);
+void SimpleRenderSystem::RenderGameObjects(FrameInfo &frameInfo,
+                                           std::vector<GameObject> &gameObjects) {
+    pipeline->Bind(frameInfo.commandBuffer);
 
-    auto projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
+    auto projectionView = frameInfo.camera.GetProjectionMatrix() * frameInfo.camera.GetViewMatrix();
 
     for (auto &obj: gameObjects) {
         SimplePushConstantData pushConstantData = SimplePushConstantData();
@@ -87,12 +86,12 @@ void SimpleRenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer,
         pushConstantData.transform = projectionView * modelMatrix;
         pushConstantData.normalMatrix = obj.transformComponent.normalMatrix();
 
-        vkCmdPushConstants(commandBuffer, pipelineLayout,
+        vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout,
                            VK_SHADER_STAGE_VERTEX_BIT |
                            VK_SHADER_STAGE_FRAGMENT_BIT,
                            0, sizeof(SimplePushConstantData), &pushConstantData);
-        obj.model->Bind(commandBuffer);
-        obj.model->Draw(commandBuffer);
+        obj.model->Bind(frameInfo.commandBuffer);
+        obj.model->Draw(frameInfo.commandBuffer);
     }
 }
 

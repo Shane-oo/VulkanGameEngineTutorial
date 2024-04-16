@@ -5,14 +5,23 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
 #include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
+
 
 #include "FirstApp.h"
 #include "KeyboardMovementController.h"
 #include "SimpleRenderSystem.h"
 #include <array>
 #include <chrono>
-#include <stdexcept>
+
+
+// #region structs
+
+struct GlobalUbo {
+    glm::mat4 projectionView = glm::mat4(1.f);
+    glm::vec3 lightDirection = glm::normalize(glm::vec3(1.f, -3.f, -1.f));
+};
+
+// #endregion
 
 // #region Private Methods
 
@@ -47,6 +56,19 @@ FirstApp::~FirstApp() {}
 
 // #region Public Methods
 void FirstApp::Run() {
+
+    Buffer globalUboBuffer = Buffer(
+            engineDevice,
+            sizeof(GlobalUbo),
+            EngineSwapChain::MAX_FRAMES_IN_FLIGHT,
+            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+            engineDevice.properties.limits.minUniformBufferOffsetAlignment
+    );
+
+    globalUboBuffer.map();
+
+
     SimpleRenderSystem simpleRenderSystem =
             SimpleRenderSystem(engineDevice, renderer.GetSwapChainRederPass());
     Camera camera = Camera();
@@ -80,8 +102,18 @@ void FirstApp::Run() {
         camera.SetPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
 
         if (auto commandBuffer = renderer.BeginDrawFrame()) {
+            int frameIndex = renderer.GetFrameIndex();
+            auto frameInfo = FrameInfo(frameIndex, frameTime, commandBuffer, camera);
+
+            // update
+            GlobalUbo ubo = GlobalUbo();
+            ubo.projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
+            globalUboBuffer.writeToIndex(&ubo, frameIndex);
+            globalUboBuffer.flushIndex(frameIndex);
+
+            // render
             renderer.BeginSwapChainRenderPass(commandBuffer);
-            simpleRenderSystem.RenderGameObjects(commandBuffer, gameObjects, camera);
+            simpleRenderSystem.RenderGameObjects(frameInfo, gameObjects);
             renderer.EndSwapChainRenderPass(commandBuffer);
             renderer.EndDrawFrame();
         }

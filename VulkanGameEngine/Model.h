@@ -14,6 +14,7 @@
 #include <memory>
 
 #include "EngineDevice.h"
+#include "Buffer.h"
 
 class Model {
 
@@ -59,13 +60,12 @@ public:
 
 private:
     EngineDevice &engineDevice;
-    VkBuffer vertexBuffer;
-    VkDeviceMemory vertexBufferMemory;
+    
+    std::unique_ptr<Buffer> vertexBuffer;
     uint32_t vertexCount;
 
     bool hasIndexBuffer = false;
-    VkBuffer indexBuffer;
-    VkDeviceMemory indexBufferMemory;
+    std::unique_ptr<Buffer> indexBuffer;
     uint32_t indexCount;
 
     void createVertexBuffers(const std::vector<Vertex> &vertices);
