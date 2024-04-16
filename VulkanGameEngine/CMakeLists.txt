@@ -35,7 +35,13 @@ add_executable (VulkanGameEngine "VulkanGameEngine.cpp" "VulkanGameEngine.h"
         Utils.h
         Buffer.cpp
         Buffer.h
-        FrameInfo.h)
+        FrameInfo.h
+        Descriptors/DescriptorSetLayout.cpp
+        Descriptors/DescriptorSetLayout.h
+        Descriptors/DescriptorPool.cpp
+        Descriptors/DescriptorPool.h
+        Descriptors/DescriptorWriter.cpp
+        Descriptors/DescriptorWriter.h)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VulkanGameEngine PROPERTY CXX_STANDARD 20)

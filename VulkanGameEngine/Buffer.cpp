@@ -92,7 +92,7 @@ void Buffer::writeToBuffer(void *data, VkDeviceSize size, VkDeviceSize offset) {
 }
 
 /**
- * Flush a memory range of the buffer to make it visible to the device
+ * Flush a memory range of the buffer to make it visible to the engineDevice
  *
  * @note Only required for non-coherent memory
  *
@@ -159,7 +159,7 @@ void Buffer::writeToIndex(void *data, int index) {
 }
 
 /**
- *  Flush the memory range at index * alignmentSize of the buffer to make it visible to the device
+ *  Flush the memory range at index * alignmentSize of the buffer to make it visible to the engineDevice
  *
  * @param index Used in offset calculation
  *

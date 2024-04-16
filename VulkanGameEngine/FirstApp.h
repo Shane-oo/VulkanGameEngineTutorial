@@ -10,6 +10,7 @@
 #include "Window.h"
 #include "GameObject.h"
 #include "Renderer.h"
+#include "Descriptors/DescriptorPool.h"
 
 class FirstApp {
 public:
@@ -31,6 +32,8 @@ private:
     EngineDevice engineDevice = EngineDevice(window);
     Renderer renderer = Renderer(window, engineDevice);
 
+    // note: order of declarations matters
+    std::unique_ptr<DescriptorPool> globalPool = std::unique_ptr<DescriptorPool>();
     std::vector<GameObject> gameObjects;
     
     void loadGameObjects();

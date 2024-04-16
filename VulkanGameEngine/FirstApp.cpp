@@ -10,6 +10,8 @@
 #include "FirstApp.h"
 #include "KeyboardMovementController.h"
 #include "SimpleRenderSystem.h"
+#include "Descriptors/DescriptorSetLayout.h"
+#include "Descriptors/DescriptorWriter.h"
 #include <array>
 #include <chrono>
 
@@ -48,7 +50,15 @@ void FirstApp::loadGameObjects() {
 
 // #region Constructors
 
-FirstApp::FirstApp() { loadGameObjects(); }
+FirstApp::FirstApp() {
+    globalPool = DescriptorPool::Builder(engineDevice)
+            .setMaxSets(EngineSwapChain::MAX_FRAMES_IN_FLIGHT)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, EngineSwapChain::MAX_FRAMES_IN_FLIGHT)
+            .build();
+
+
+    loadGameObjects();
+}
 
 FirstApp::~FirstApp() {}
 
@@ -57,20 +67,35 @@ FirstApp::~FirstApp() {}
 // #region Public Methods
 void FirstApp::Run() {
 
-    std::vector<std::unique_ptr<Buffer>> uboBuffers = std::vector<std::unique_ptr<Buffer>>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT);
-    for(int i=0;i<uboBuffers.size();i++){
+    std::vector<std::unique_ptr<Buffer>> uboBuffers = std::vector<std::unique_ptr<Buffer>>(
+            EngineSwapChain::MAX_FRAMES_IN_FLIGHT);
+    for (int i = 0; i < uboBuffers.size(); i++) {
         uboBuffers[i] = std::make_unique<Buffer>(
                 engineDevice,
                 sizeof(GlobalUbo),
                 1,
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-                );
+        );
         uboBuffers[i]->map();
     }
 
+    auto globalSetLayout = DescriptorSetLayout::Builder(engineDevice)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .build();
+
+    std::vector<VkDescriptorSet> globalDescriptorSets = std::vector<VkDescriptorSet>(
+            EngineSwapChain::MAX_FRAMES_IN_FLIGHT);
+    for (int i = 0; i < globalDescriptorSets.size(); i++) {
+        auto bufferInfo = uboBuffers[i]->descriptorInfo();
+        DescriptorWriter(*globalSetLayout, *globalPool)
+                .writeBuffer(0, &bufferInfo)
+                .build(globalDescriptorSets[i]);
+
+    }
+
     SimpleRenderSystem simpleRenderSystem =
-            SimpleRenderSystem(engineDevice, renderer.GetSwapChainRederPass());
+            SimpleRenderSystem(engineDevice, renderer.GetSwapChainRederPass(), globalSetLayout->getDescriptorSetLayout());
     Camera camera = Camera();
     glm::vec3 position = glm::vec3(-1.f, -2.f, -7.f);
     glm::vec3 direction = glm::vec3(0.5f, 0.f, 1.f);
@@ -103,7 +128,7 @@ void FirstApp::Run() {
 
         if (auto commandBuffer = renderer.BeginDrawFrame()) {
             int frameIndex = renderer.GetFrameIndex();
-            auto frameInfo = FrameInfo(frameIndex, frameTime, commandBuffer, camera);
+            auto frameInfo = FrameInfo(frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex]);
 
             // update
             GlobalUbo ubo = GlobalUbo();
