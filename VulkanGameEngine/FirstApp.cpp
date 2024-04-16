@@ -57,17 +57,17 @@ FirstApp::~FirstApp() {}
 // #region Public Methods
 void FirstApp::Run() {
 
-    Buffer globalUboBuffer = Buffer(
-            engineDevice,
-            sizeof(GlobalUbo),
-            EngineSwapChain::MAX_FRAMES_IN_FLIGHT,
-            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-            engineDevice.properties.limits.minUniformBufferOffsetAlignment
-    );
-
-    globalUboBuffer.map();
-
+    std::vector<std::unique_ptr<Buffer>> uboBuffers = std::vector<std::unique_ptr<Buffer>>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT);
+    for(int i=0;i<uboBuffers.size();i++){
+        uboBuffers[i] = std::make_unique<Buffer>(
+                engineDevice,
+                sizeof(GlobalUbo),
+                1,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+                );
+        uboBuffers[i]->map();
+    }
 
     SimpleRenderSystem simpleRenderSystem =
             SimpleRenderSystem(engineDevice, renderer.GetSwapChainRederPass());
@@ -108,8 +108,8 @@ void FirstApp::Run() {
             // update
             GlobalUbo ubo = GlobalUbo();
             ubo.projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
-            globalUboBuffer.writeToIndex(&ubo, frameIndex);
-            globalUboBuffer.flushIndex(frameIndex);
+            uboBuffers[frameIndex]->writeToBuffer(&ubo);
+            uboBuffers[frameIndex]->flush();
 
             // render
             renderer.BeginSwapChainRenderPass(commandBuffer);
