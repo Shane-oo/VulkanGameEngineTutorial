@@ -18,9 +18,12 @@
 
 // #region structs
 
+// keep in mind alignment rules
 struct GlobalUbo {
     glm::mat4 projectionView = glm::mat4(1.f);
-    glm::vec3 lightDirection = glm::normalize(glm::vec3(1.f, -3.f, -1.f));
+    glm::vec4 ambientLightColour = glm::vec4(1.f, 1.f, 1.f, 0.0f);
+    glm::vec3 lightPosition = glm::vec3(-1.f);
+    alignas(16) glm::vec4 lightColour = glm::vec4(1.0f); // w is light intensity
 };
 
 // #endregion
@@ -32,7 +35,7 @@ void FirstApp::loadGameObjects() {
 
     auto flatVase = GameObject::createGameObject();
     flatVase.model = model;
-    flatVase.transformComponent.Translation = glm::vec3(-.5f, .5f, 2.5f);
+    flatVase.transformComponent.Translation = glm::vec3(-.5f, .5f, 0.f);
     flatVase.transformComponent.Scale = glm::vec3(3.f, 1.5f, 3.f);
     gameObjects.push_back(std::move(flatVase));
 
@@ -40,10 +43,19 @@ void FirstApp::loadGameObjects() {
 
     auto smoothVase = GameObject::createGameObject();
     smoothVase.model = model;
-    smoothVase.transformComponent.Translation = glm::vec3(.5f, .5f, 2.5f);
+    smoothVase.transformComponent.Translation = glm::vec3(.5f, .5f, 0.f);
     smoothVase.transformComponent.Scale = glm::vec3(3.f, 1.5f, 3.f);
 
     gameObjects.push_back(std::move(smoothVase));
+
+    model = Model::CreateModelFromFile(engineDevice, "models/quad.obj");
+
+    auto floor = GameObject::createGameObject();
+    floor.model = model;
+    floor.transformComponent.Translation = glm::vec3(.0f, .5f, 0.f);
+    floor.transformComponent.Scale = glm::vec3(3.f, 1.f, 3.f);
+
+    gameObjects.push_back(std::move(floor));
 }
 
 // #endregion
@@ -95,7 +107,8 @@ void FirstApp::Run() {
     }
 
     SimpleRenderSystem simpleRenderSystem =
-            SimpleRenderSystem(engineDevice, renderer.GetSwapChainRederPass(), globalSetLayout->getDescriptorSetLayout());
+            SimpleRenderSystem(engineDevice, renderer.GetSwapChainRederPass(),
+                               globalSetLayout->getDescriptorSetLayout());
     Camera camera = Camera();
     glm::vec3 position = glm::vec3(-1.f, -2.f, -7.f);
     glm::vec3 direction = glm::vec3(0.5f, 0.f, 1.f);
@@ -103,6 +116,7 @@ void FirstApp::Run() {
     camera.SetViewTarget(position, target);
 
     auto viewerObject = GameObject::createGameObject();
+    viewerObject.transformComponent.Translation.z = -2.5f;
     KeyboardMovementController cameraController = KeyboardMovementController();
 
     auto currentTime = std::chrono::high_resolution_clock::now();
@@ -124,7 +138,7 @@ void FirstApp::Run() {
                           viewerObject.transformComponent.Rotation);
 
         float aspect = renderer.GetAspectRatio();
-        camera.SetPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
+        camera.SetPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 100.f);
 
         if (auto commandBuffer = renderer.BeginDrawFrame()) {
             int frameIndex = renderer.GetFrameIndex();
