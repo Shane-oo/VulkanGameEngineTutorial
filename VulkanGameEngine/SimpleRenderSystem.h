@@ -22,7 +22,7 @@ public:
 
     SimpleRenderSystem &operator=(const SimpleRenderSystem &) = delete;
 
-    void RenderGameObjects(FrameInfo &frameInfo, std::vector<GameObject> &gameObjects);
+    void RenderGameObjects(FrameInfo &frameInfo);
 
 private:
     EngineDevice &engineDevice;

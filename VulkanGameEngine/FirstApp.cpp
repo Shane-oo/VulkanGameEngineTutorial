@@ -37,7 +37,7 @@ void FirstApp::loadGameObjects() {
     flatVase.model = model;
     flatVase.transformComponent.Translation = glm::vec3(-.5f, .5f, 0.f);
     flatVase.transformComponent.Scale = glm::vec3(3.f, 1.5f, 3.f);
-    gameObjects.push_back(std::move(flatVase));
+    gameObjects.emplace(flatVase.getId(), std::move(flatVase));
 
     model = Model::CreateModelFromFile(engineDevice, "models/smooth_vase.obj");
 
@@ -46,7 +46,7 @@ void FirstApp::loadGameObjects() {
     smoothVase.transformComponent.Translation = glm::vec3(.5f, .5f, 0.f);
     smoothVase.transformComponent.Scale = glm::vec3(3.f, 1.5f, 3.f);
 
-    gameObjects.push_back(std::move(smoothVase));
+    gameObjects.emplace(smoothVase.getId(), std::move(smoothVase));
 
     model = Model::CreateModelFromFile(engineDevice, "models/quad.obj");
 
@@ -55,7 +55,7 @@ void FirstApp::loadGameObjects() {
     floor.transformComponent.Translation = glm::vec3(.0f, .5f, 0.f);
     floor.transformComponent.Scale = glm::vec3(3.f, 1.f, 3.f);
 
-    gameObjects.push_back(std::move(floor));
+    gameObjects.emplace(floor.getId(), std::move(floor));
 }
 
 // #endregion
@@ -93,7 +93,7 @@ void FirstApp::Run() {
     }
 
     auto globalSetLayout = DescriptorSetLayout::Builder(engineDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                         VK_SHADER_STAGE_ALL_GRAPHICS)
             .build();
 
@@ -143,7 +143,12 @@ void FirstApp::Run() {
 
         if (auto commandBuffer = renderer.BeginDrawFrame()) {
             int frameIndex = renderer.GetFrameIndex();
-            auto frameInfo = FrameInfo(frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex]);
+            auto frameInfo = FrameInfo(frameIndex,
+                                       frameTime,
+                                       commandBuffer,
+                                       camera,
+                                       globalDescriptorSets[frameIndex],
+                                       gameObjects);
 
             // update
             GlobalUbo ubo = GlobalUbo();
@@ -153,7 +158,7 @@ void FirstApp::Run() {
 
             // render
             renderer.BeginSwapChainRenderPass(commandBuffer);
-            simpleRenderSystem.RenderGameObjects(frameInfo, gameObjects);
+            simpleRenderSystem.RenderGameObjects(frameInfo);
             renderer.EndSwapChainRenderPass(commandBuffer);
             renderer.EndDrawFrame();
         }

@@ -34,7 +34,7 @@ private:
 
     // note: order of declarations matters
     std::unique_ptr<DescriptorPool> globalPool = std::unique_ptr<DescriptorPool>();
-    std::vector<GameObject> gameObjects;
+    GameObject::Map gameObjects;
     
     void loadGameObjects();
 

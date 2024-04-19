@@ -78,8 +78,7 @@ SimpleRenderSystem::~SimpleRenderSystem() {
 
 // #region Public Methods
 
-void SimpleRenderSystem::RenderGameObjects(FrameInfo &frameInfo,
-                                           std::vector<GameObject> &gameObjects) {
+void SimpleRenderSystem::RenderGameObjects(FrameInfo &frameInfo) {
     pipeline->Bind(frameInfo.commandBuffer);
 
     vkCmdBindDescriptorSets(frameInfo.commandBuffer,
@@ -91,7 +90,11 @@ void SimpleRenderSystem::RenderGameObjects(FrameInfo &frameInfo,
                             0,
                             nullptr);
 
-    for (auto &obj: gameObjects) {
+    for (auto &kv: frameInfo.gameObjects) {
+        auto & obj = kv.second;
+
+        if(obj.model == nullptr) continue;
+
         SimplePushConstantData pushConstantData = SimplePushConstantData();
         pushConstantData.modelMatrix = obj.transformComponent.mat4();
         pushConstantData.normalMatrix = obj.transformComponent.normalMatrix();
