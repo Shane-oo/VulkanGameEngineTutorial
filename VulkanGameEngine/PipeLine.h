@@ -13,6 +13,10 @@
 struct PipeLineConfigInfo {
 /*    PipeLineConfigInfo(const PipeLineConfigInfo&) = delete;
     PipeLineConfigInfo& operator=(const PipeLineConfigInfo&) = delete;*/
+    
+    std::vector<VkVertexInputBindingDescription> bindingDescriptions = std::vector<VkVertexInputBindingDescription>();
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions = std::vector<VkVertexInputAttributeDescription>();
+
 
     VkPipelineViewportStateCreateInfo viewportInfo;
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;

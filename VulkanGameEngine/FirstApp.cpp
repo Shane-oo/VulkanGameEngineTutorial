@@ -9,9 +9,10 @@
 
 #include "FirstApp.h"
 #include "KeyboardMovementController.h"
-#include "SimpleRenderSystem.h"
+#include "Systems/SimpleRenderSystem.h"
 #include "Descriptors/DescriptorSetLayout.h"
 #include "Descriptors/DescriptorWriter.h"
+#include "Systems/PointLightSystem.h"
 #include <array>
 #include <chrono>
 
@@ -20,7 +21,8 @@
 
 // keep in mind alignment rules
 struct GlobalUbo {
-    glm::mat4 projectionView = glm::mat4(1.f);
+    glm::mat4 projection = glm::mat4(1.f);
+    glm::mat4 view = glm::mat4(1.f);
     glm::vec4 ambientLightColour = glm::vec4(1.f, 1.f, 1.f, 0.0f);
     glm::vec3 lightPosition = glm::vec3(-1.f);
     alignas(16) glm::vec4 lightColour = glm::vec4(1.0f); // w is light intensity
@@ -81,15 +83,15 @@ void FirstApp::Run() {
 
     std::vector<std::unique_ptr<Buffer>> uboBuffers = std::vector<std::unique_ptr<Buffer>>(
             EngineSwapChain::MAX_FRAMES_IN_FLIGHT);
-    for (int i = 0; i < uboBuffers.size(); i++) {
-        uboBuffers[i] = std::make_unique<Buffer>(
+    for (auto &uboBuffer: uboBuffers) {
+        uboBuffer = std::make_unique<Buffer>(
                 engineDevice,
                 sizeof(GlobalUbo),
                 1,
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
         );
-        uboBuffers[i]->map();
+        uboBuffer->map();
     }
 
     auto globalSetLayout = DescriptorSetLayout::Builder(engineDevice)
@@ -107,9 +109,15 @@ void FirstApp::Run() {
 
     }
 
-    SimpleRenderSystem simpleRenderSystem =
-            SimpleRenderSystem(engineDevice, renderer.GetSwapChainRederPass(),
-                               globalSetLayout->getDescriptorSetLayout());
+    SimpleRenderSystem simpleRenderSystem = SimpleRenderSystem(
+            engineDevice,
+            renderer.GetSwapChainRederPass(),
+            globalSetLayout->getDescriptorSetLayout());
+    PointLightSystem pointLightRenderSystem = PointLightSystem(
+            engineDevice,
+            renderer.GetSwapChainRederPass(),
+            globalSetLayout->getDescriptorSetLayout());
+
     Camera camera = Camera();
     glm::vec3 position = glm::vec3(-1.f, -2.f, -7.f);
     glm::vec3 direction = glm::vec3(0.5f, 0.f, 1.f);
@@ -152,13 +160,16 @@ void FirstApp::Run() {
 
             // update
             GlobalUbo ubo = GlobalUbo();
-            ubo.projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
+            ubo.projection = camera.GetProjectionMatrix();
+            ubo.view = camera.GetViewMatrix();
+
             uboBuffers[frameIndex]->writeToBuffer(&ubo);
             uboBuffers[frameIndex]->flush();
 
             // render
             renderer.BeginSwapChainRenderPass(commandBuffer);
             simpleRenderSystem.RenderGameObjects(frameInfo);
+            pointLightRenderSystem.Render(frameInfo);
             renderer.EndSwapChainRenderPass(commandBuffer);
             renderer.EndDrawFrame();
         }

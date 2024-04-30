@@ -5,11 +5,11 @@
 #ifndef VULKANGAMEENGINETUTORIAL_SIMPLERENDERSYSTEM_H
 #define VULKANGAMEENGINETUTORIAL_SIMPLERENDERSYSTEM_H
 
-#include "Camera.h"
-#include "EngineDevice.h"
-#include "GameObject.h"
-#include "PipeLine.h"
-#include "FrameInfo.h"
+#include "../Camera.h"
+#include "../EngineDevice.h"
+#include "../GameObject.h"
+#include "../PipeLine.h"
+#include "../FrameInfo.h"
 
 class SimpleRenderSystem {
 public:
