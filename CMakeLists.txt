@@ -17,7 +17,7 @@ if(WIN32)
           ERROR_VARIABLE error_output
   )
   if(result EQUAL 0)
-    message(STATUS "Shaders Compiled executed successfully")
+    message(STATUS "Shaders Compiled Successfully")
   else()
     message(FATAL_ERROR "Error executing Shader Compiler: ${error_output}")
   endif()
@@ -30,6 +30,6 @@ add_subdirectory ("VulkanGameEngine")
 
 
 
-#124345656778
+#12434565677891
 
 

@@ -21,7 +21,12 @@ struct TransformComponent {
     // Rotations correspond to Tait-bryan angles of Y(1), X(2), Z(3)
     // https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
     glm::mat4 mat4();
+
     glm::mat3 normalMatrix();
+};
+
+struct PointLightComponent {
+    float lightIntensity = 1.0f;
 };
 
 class GameObject {
@@ -33,6 +38,8 @@ public:
         static id_t currentId = 0;
         return GameObject(currentId++);
     }
+
+    static GameObject createPointLight(float intensity = 10.f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.f));
 
     GameObject(const GameObject &) = delete;
 
@@ -47,6 +54,9 @@ public:
     std::shared_ptr<Model> model = std::shared_ptr<Model>();
     glm::vec3 color = glm::vec3();
     TransformComponent transformComponent = TransformComponent();
+
+    // Optional pointer components
+    std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
 private:
     explicit GameObject(id_t id) {

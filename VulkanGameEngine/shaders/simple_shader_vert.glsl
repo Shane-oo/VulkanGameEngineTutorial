@@ -9,12 +9,17 @@ layout (location = 0) out vec3 fragColour;
 layout (location = 1) out vec3 fragPositionWorld;
 layout (location = 2) out vec3 fragNormalWorld;
 
+struct PointLight {
+    vec4 position; // ignore w
+    vec4 color; // w is intensity
+};
+
 layout (set = 0, binding = 0) uniform GlobalUbo {
     mat4 projectionMatrix;
     mat4 viewMatrix;
     vec4 ambientLightColour;
-    vec3 lightPosition;
-    vec4 lightColour;
+    PointLight pointLights[10]; // 10 is MAX_LIGHTS
+    int numLights;
 } ubo;
 
 layout (push_constant) uniform Push {

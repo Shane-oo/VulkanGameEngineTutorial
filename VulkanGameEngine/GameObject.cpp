@@ -35,19 +35,33 @@ glm::mat3 TransformComponent::normalMatrix() {
             {
                     inverseScale.x * (c1 * c3 + s1 * s2 * s3),
                     inverseScale.x * (c2 * s3),
-                    inverseScale.x *(c1 * s2 * s3 - c3 * s1)
-                },
+                    inverseScale.x * (c1 * s2 * s3 - c3 * s1)
+            },
             {
                     inverseScale.y * (c3 * s1 * s2 - c1 * s3),
                     inverseScale.y * (c2 * c3),
-                    inverseScale.y *(c1 * c3 * s2 + s1 * s3)
-                },
+                    inverseScale.y * (c1 * c3 * s2 + s1 * s3)
+            },
             {
                     inverseScale.z * (c2 * s1),
                     inverseScale.z * (-s2),
                     inverseScale.z * (c1 * c2)
-                }
+            }
     };
+}
+
+// #endregion
+
+
+// #region Public Methods
+
+GameObject GameObject::createPointLight(float intensity, float radius, glm::vec3 color) {
+    GameObject gameObject = GameObject::createGameObject();
+    gameObject.color = color;
+    gameObject.transformComponent.Scale.x = radius;
+    gameObject.pointLight = std::make_unique<PointLightComponent>();
+    gameObject.pointLight->lightIntensity = intensity;
+    return gameObject;
 }
 
 // #endregion

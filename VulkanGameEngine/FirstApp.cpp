@@ -19,15 +19,6 @@
 
 // #region structs
 
-// keep in mind alignment rules
-struct GlobalUbo {
-    glm::mat4 projection = glm::mat4(1.f);
-    glm::mat4 view = glm::mat4(1.f);
-    glm::vec4 ambientLightColour = glm::vec4(1.f, 1.f, 1.f, 0.0f);
-    glm::vec3 lightPosition = glm::vec3(-1.f);
-    alignas(16) glm::vec4 lightColour = glm::vec4(1.0f); // w is light intensity
-};
-
 // #endregion
 
 // #region Private Methods
@@ -58,6 +49,28 @@ void FirstApp::loadGameObjects() {
     floor.transformComponent.Scale = glm::vec3(3.f, 1.f, 3.f);
 
     gameObjects.emplace(floor.getId(), std::move(floor));
+
+
+    std::vector<glm::vec3> lightColors{
+            {1.f,  .1f,  .1f},
+            {.1f,  .1f,  1.f},
+            {.1f,  1.f,  .1f},
+            {1.f,  1.f,  .1f},
+            {.1f,  1.f,  1.f},
+            {1.f,  1.f,  1.f},
+            {0.5f, 0.5f, 0.5f}
+    };
+
+    for (int i = 0; i < lightColors.size(); i++) {
+        {
+            auto pointLight = GameObject::createPointLight(0.2f);
+            pointLight.color = lightColors[i];
+            auto rotateLight = glm::rotate(glm::mat4(1.f), (i * glm::two_pi<float>()) / lightColors.size(),
+                                           {0.f, -1.f, 0.f});
+            pointLight.transformComponent.Translation = glm::vec3(rotateLight * glm::vec4(-1.f, -1.f, -1.f, 1.f));
+            gameObjects.emplace(pointLight.getId(), std::move(pointLight));
+        }
+    }
 }
 
 // #endregion
@@ -162,6 +175,7 @@ void FirstApp::Run() {
             GlobalUbo ubo = GlobalUbo();
             ubo.projection = camera.GetProjectionMatrix();
             ubo.view = camera.GetViewMatrix();
+            pointLightRenderSystem.Update(frameInfo, ubo);
 
             uboBuffers[frameIndex]->writeToBuffer(&ubo);
             uboBuffers[frameIndex]->flush();

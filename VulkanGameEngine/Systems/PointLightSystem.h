@@ -24,6 +24,8 @@ public:
     PointLightSystem &operator=(const PointLightSystem &) = delete;
 
     void Render(FrameInfo &frameInfo);
+    
+    void Update(FrameInfo &frameInfo, GlobalUbo &ubo);
 
 private:
     EngineDevice &engineDevice;
