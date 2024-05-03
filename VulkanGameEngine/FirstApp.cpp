@@ -175,6 +175,7 @@ void FirstApp::Run() {
             GlobalUbo ubo = GlobalUbo();
             ubo.projection = camera.GetProjectionMatrix();
             ubo.view = camera.GetViewMatrix();
+            ubo.inverseView = camera.GetInverseViewMatrix();
             pointLightRenderSystem.Update(frameInfo, ubo);
 
             uboBuffers[frameIndex]->writeToBuffer(&ubo);

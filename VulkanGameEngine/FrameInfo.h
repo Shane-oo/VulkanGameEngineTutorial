@@ -28,6 +28,7 @@ struct FrameInfo {
 struct GlobalUbo {
     glm::mat4 projection = glm::mat4(1.f);
     glm::mat4 view = glm::mat4(1.f);
+    glm::mat4 inverseView = glm::mat4(1.f);
     glm::vec4 ambientLightColour = glm::vec4(1.f, 1.f, 1.f, 0.0f);
     PointLight pointLights[MAX_LIGHTS];
     int numLight;
